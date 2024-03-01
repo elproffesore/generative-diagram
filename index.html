@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600;1,900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>GENERATIVE-DIAGRAM</title>
+</head>
+
+<body>
+    <div id="wrapper" >
+        <div id="timeline">
+        </div>
+        <div id="diagram">
+        </div>
+        <canvas id="paths"></canvas>
+    </div>
+    <script>
+        const diagram = [];
+        (async function () {
+            let content = await fetch('content.md')
+            content = await content.text()
+            content.split('-----').map((session, sessionIndex) => {
+                //split the session into text and relations
+                let [text, relations] = session.split('---')
+                //append the text
+                let contentDiv = document.createElement('div')
+                contentDiv.classList.add("text")
+                contentDiv.innerHTML = marked.parse(text)
+                document.getElementById('timeline').appendChild(contentDiv)
+                //process relations
+                relations = bilink(d3.hierarchy(JSON.parse(relations)))
+                //push each diagram to the diagram array
+                diagram.push(relations) 
+            })
+            //draw the first diagram
+            draw(diagram[0])
+        })()
+        function draw(relations){
+            let diagram = document.getElementById('diagram')
+            diagram.innerHTML = ''
+            let paths = document.getElementById('paths')
+            let body  = document.getElementsByTagName('body')[0]
+            paths.width = window.innerWidth * 2
+            paths.height = window.innerHeight * 2
+            let diagramWidth = document.getElementById('diagram').offsetWidth
+            let diagramHeight = document.getElementById('diagram').offsetHeight
+            let canvas = document.getElementById('paths')
+            let context = canvas.getContext('2d')
+            context.strokeStyle = 'black'
+            context.lineWidth = 2 
+            context.clearRect(0, 0, canvas.width, canvas.height)
+            let rows = (window.innerHeight - 100) / relations.children.length
+            let lines = [];
+            relations.children.map((level, levelID) => {
+                let row = document.createElement('div')
+                row.classList.add('row')
+                row.style.height = `${rows}px`
+                row.style.width = `${diagramWidth}px`
+                row.style.transform = `translate(0, ${rows * levelID}px)`
+                document.getElementById('diagram').appendChild(row)
+                level.children.map((entity, entityID) => {
+                    console.log(entity) 
+                    let div = document.createElement('div')
+                    entity.dom = div
+                    div.classList.add(entity.data.type, "diagramObject")
+                    div.innerHTML = marked.parse(entity.data.content)
+                    row.appendChild(div)
+                    entity.outgoing.map(relation => lines.push([relation[0],relation[1]]))
+                })
+            })
+            let offset = 100
+            function animate() {
+                offset -= 2 
+                context.clearRect(0, 0, canvas.width, canvas.height)
+                lines.map(l => {
+                    line(l[0], l[1], context, offset)
+                })
+                if(offset > 0){
+                    console.log('animating')
+                    requestAnimationFrame(animate)
+                }
+            }
+            animate()
+        }
+        function line(entity, parent,context,offset) {
+                let entityBounding = entity.dom.getBoundingClientRect()
+                let parentBounding = parent.dom.getBoundingClientRect()
+                context.beginPath()
+                context.setLineDash([3100,3100]);
+                context.lineDashOffset = -offset*10
+                context.moveTo(entityBounding.x * 2 + entityBounding.width, entityBounding.y * 2 - 10 )
+                context.bezierCurveTo(
+                    entityBounding.x * 2 + entityBounding.width, parentBounding.y * 2 + parentBounding.height * 2 + (entityBounding.y  * 2 - parentBounding.y * 2) / 2 - 10,
+                    parentBounding.x * 2 + parentBounding.width, parentBounding.y * 2 + parentBounding.height * 2 + (entityBounding.y  * 2 - parentBounding.y * 2) / 2 - 10,
+                    parentBounding.x * 2 + parentBounding.width, parentBounding.y * 2 + parentBounding.height * 2 + 10
+                )
+                context.stroke()
+        }
+        function bilink(root) {
+            const map = new Map(root.leaves().map(d => [id(d), d]));
+            for (const d of root.leaves()) {
+                d.incoming = [];
+                d.outgoing = d.data.imports.map(i => [d, map.get(i)]);
+            }
+            for (const d of root.leaves()) {
+                for (const o of d.outgoing) {
+                    o[1].incoming.push(o);
+                }
+            }
+            return root;
+        }
+        function id(node) {
+            return `${node.parent != null ? this.id(node.parent) + "." : ""}${node.data.name}`;
+        }
+        let lastIndex = 0 
+        document.addEventListener('scroll', (event) => {
+            let scroll = window.scrollY + window.innerHeight / 3
+            let stage = Math.floor( scroll / (document.getElementById('timeline').offsetHeight / diagram.length));
+            if(lastIndex != stage){
+                lastIndex = stage
+                draw(diagram[stage])
+            }
+        })
+    </script>
+</body>
+</html>

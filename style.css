@@ -1,0 +1,123 @@
+md-content {
+    scrollbar-width: none;
+}
+
+md-content::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    width: 100vw;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    font-family: 'Crimson Text', serif;
+}
+p, h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    padding: 0;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: bold !important;
+}
+
+h1 {
+    font-size: 1.5em !important;
+}
+
+h2 {
+    font-size: 1.3em !important;
+}
+
+h3 {
+    font-size: 1.1em !important;
+}
+
+#timeline {
+    width: 30vw;
+}
+
+#diagram {
+    position: fixed;
+    margin-left: 30vw;
+    top: 0;
+    width: 70vw;
+    height: 100vh;
+}
+
+#paths {
+    position: fixed;
+    top: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5em;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    top: 0;
+    position: absolute;
+}
+.text{
+    height: 100vh;
+    padding: 2.5em;
+    text-align: justify;
+    font-size: 1em;
+}
+.text:last-child{
+    margin-top: 8em;
+}
+.diagramObject {
+    height: max-content;
+    width: max-content;
+    max-width: 12em;
+    min-width: 10em;
+    padding: 0.5em;
+    text-align: center;
+}
+/* Styling of the components */
+.topic {
+    background-color: black;
+    color: white;
+    border: 1px solid black;
+}
+
+.question {
+    background-color: white;
+    color: black;
+    border: 0;
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+    border-radius: 10px;
+    font-style: italic;
+}
+
+.process {
+    background-color: white;
+    color: black;
+    border-bottom: 2px solid black;
+    border-top: 2px solid black;
+    border-radius: 5px;
+}
+
+.input {
+    background-color: white;
+    color: black;
+    border: 2px dashed black;
+}
+
+.result {
+    background-color: white;
+    color: black;
+    border: 4px double black;
+    font-weight: bold;
+}
