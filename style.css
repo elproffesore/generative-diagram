@@ -84,6 +84,11 @@ h3 {
     padding: 0.5em;
     text-align: center;
 }
+img{
+    max-width: 50%;
+    height: auto;
+
+}
 /* Styling of the components */
 .topic {
     background-color: black;
