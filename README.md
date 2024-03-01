@@ -9,3 +9,7 @@ In the markdown file you can also use the JSON structure to define the diagram. 
 
 1. Edit the content.md file to reflect the structure of your project.
 2. Run webserver with the contents.
+
+## Showcase
+
+![Demovideo](./media/demonstration.gif)
